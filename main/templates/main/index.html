@@ -1,0 +1,65 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block title %}
+Login
+{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block nav %}
+                  {% if response.user.is_authenticated %}
+                    <li class="ms-2 nav-item btn btn-secondary p-0 dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if logged_in_user.avatar %}
+                          <img class="border rounded-circle" src="{{logged_in_user.avatar.url}}" style="height:20px; width: 20px; object-fit: cover; object-position: center;"/>
+                        {% else %}
+                          <img class="border rounded-circle" src="{% static 'img/avatar_default.jpg' %}" style="height:20px; width: 20px; object-fit: cover; object-position: center;"/>
+                        {% endif %}
+                        {{response.user.username}}
+                      </a>
+                      <ul class="dropdown-menu dropdown-menu-dark">
+                        <li>
+                          <a class="dropdown-item" href="/profile/{{response.user.username}}">
+                            Profile
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item " href="/logout">
+                            Logout
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                  {% else %}
+                  <li class="ms-2 nav-item btn btn-secondary p-0 dropdown">
+                    <a class="nav-link active" aria-current="page" href="/login">Login</a>
+                  </li>
+                  {% endif %}
+                {% endblock %}
+
+{% block content %}
+
+    <section class="bg-light" style="
+    background-position: center;
+    background-size: cover;
+    background-image: url('https://images.pexels.com/photos/3184358/pexels-photo-3184358.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=2&amp;h=750&amp;w=1260');
+">
+    <div class="p-2 py-md-3 py-lg-5" style="background: #00000099;">
+        <div class="container p-2 py-md-3 py-lg-4">
+        
+            <div class="row justify-content-start">
+                <div class="col-12 col-lg-6 p-2 p-lg-5 my-auto text-center text-lg-start">
+                    <h1 class="display-3 text-white">Easy, fast digital resumé</h1>
+                    <p class="lead fs-4 text-white-50">Create your profile. Easily share your resume. Discover new job opportunities</p>
+                </div>
+                                {% if not response.user.is_authenticated %}
+                                <div class="col-12 col-lg-6 p-2 p-lg-5 my-auto">
+                                    <a href="/login" class="text-decoration-none"><button class="btn btn-success d-block w-75 mx-auto mt-2 p-3 m-3">Login</button></a>
+                                    <a href="/register" class="text-decoration-none"><button class="btn btn-outline-light d-block w-75 mx-auto mt-2 p-3 m-3">Create An Account</button></a>
+                                </div>
+                                {% endif %}
+            </div>
+
+    </div>
+    </div>
+    </section>
+{% endblock %}

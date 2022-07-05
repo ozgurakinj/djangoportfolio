@@ -1,0 +1,776 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{{user.username}}'s Profile
+{% endblock %}
+
+                {% block nav %}
+                  {% if response.user.is_authenticated %}
+                    <li class="ms-2 nav-item btn btn-secondary p-0 dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if logged_in_user.avatar %}
+                          <img class="border rounded-circle" src="{{logged_in_user.avatar.url}}" style="height:20px; width: 20px; object-fit: cover; object-position: center;"/>
+                        {% else %}
+                          <img class="border rounded-circle" src="{% static 'img/avatar_default.jpg' %}" style="height:20px; width: 20px; object-fit: cover; object-position: center;"/>
+                        {% endif %}
+                        {{response.user.username}}
+                      </a>
+                      <ul class="dropdown-menu dropdown-menu-dark">
+                        <li>
+                          <a class="dropdown-item" href="/profile/{{response.user.username}}">
+                            Profile
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item " href="/logout">
+                            Logout
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                  {% else %}
+                  <li class="ms-2 nav-item btn btn-secondary p-0 dropdown">
+                    <a class="nav-link active" aria-current="page" href="/login">Login</a>
+                  </li>
+                  {% endif %}
+                {% endblock %}
+              
+              </ul>
+              
+            </div>
+          </div>
+        </nav> 
+      </div>
+    </section>
+    {% block content %}
+    
+  <section class="bg-{{user.color}} bg-gradient py-3 border-bottom">
+      <div class="container">
+      <div class="card shadow">
+      <div class="card-header bg-light bg-gradient p-5"></div>
+          <div class="card-body pb-0">
+          <div class="d-flex flex-column flex-md-row bd-highlight mb-3">
+              <div class="text-center text-md-start bd-highlight mb-3 me-0 mb-md-0 ms-0 ms-md-2 me-md-3">
+                  {% if user.avatar %}
+                  <img class="border p-2 bg-white" src="{{user.avatar.url}}" style="margin-top: -60px; height:200px; width: 200px; object-fit: cover; object-position: center;"/>
+                  {% else %}
+                  <img class="border p-2 bg-white" src="{% static 'img/avatar_default.jpg' %}" style="margin-top: -60px; max-width: 200px;"/>
+                  {% endif %}
+                  
+                  <!--<img class="border border-white border-5" src="img/pp.JPG" style="margin-top: -60px; max-width: 200px;"/>-->
+              </div>
+              <div class="p-2 text-center text-md-start bd-highlight m-auto ms-md-0 flex-grow-1">
+              <span class="d-block d-md-inline-block"><span class="fs-4 fw-bold">{{user.name}}</span>
+                {% if user.username == "ozgurakin" %}
+                <small class="small badge rounded-pill bg-{{user.color}} bg-gradient" style="vertical-align: text-bottom;">✓</small>
+                {% endif %}
+              </span>
+
+              <span class="fw-lighter fs-6 text-muted mx-2">@{{user.username}}</span>
+              {% if response.user.is_authenticated %}
+                {% if response.user.username == user.username %}
+                  <button type="button" class="btn btn-outline-{{user.color}} d-block d-md-inline-block float-md-end mx-auto mx-md-0 my-2 my-md-0" data-bs-toggle="modal" data-bs-target="#editmodal">Edit Profile</button>
+                {% endif %}
+              {% endif %}
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+              <p class="lead mb-1 text-{{user.color}}">{{user.title}}</p>
+              <p>{{user.biography}}</p>
+              {% if user.location %}
+              <p class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i>{{user.location}}</p>
+              {% endif %}
+              </div>
+              <div class="p-2 bd-highlight ms-auto align-self-center d-none">
+              <div class="row">
+                  <div class="col">
+                  <h6>Followers</h6>
+                  <h5 class="text-muted">430</h5>
+                  </div>
+                  <div class="col">
+                  <h6>Following</h6>
+                  <h5 class="text-muted">125</h5>
+                  </div>
+              </div>
+              </div>
+          </div>
+          </div>
+      </div>
+      </div>  
+  </section>  
+
+  <div class="container text-center pt-3">
+      <ul class="nav nav-pills justify-content-center" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Profile</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="pills-gallery-tab" data-bs-toggle="pill" data-bs-target="#pills-gallery" type="button" role="tab" aria-controls="pills-gallery" aria-selected="false">Gallery</button>
+        </li>
+      </ul>
+  </div>
+
+  <div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+      <div class="container">
+
+        <div class="row" data-masonry='{"percentPosition": true }'>
+          <div class="col-12 col-lg-6">
+            <div class="card mt-3 mb-3">
+              <div class="card-header">
+                <h5 class="m-2">Work Experience</h5>
+              </div>
+              <div class="card-body text-start">
+                {% if work|length > 0 %}
+                <ul class="list-group-flush p-0">
+                  {% for w in work %}
+                  <li class="list-group-item">
+                    <span class="small text-{{user.color}} fw-bold">{{w.start_year}}-{{w.end_year}}</span>
+                    <h5 class="card-title mb-1 mt-2">{{w.position}}</h5>
+                    <p class="text-secondary mb-1">{{w.firm}}</p>
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                  {% if response.user.is_authenticated %}
+                    {% if response.user.username == user.username %}
+                    <p class="text-center text-muted m-0 py-4">You haven't entered any work experience yet...</p>
+                    {% else %}
+                    <p class="text-center text-muted m-0 py-4">This user hasn't entered any work experience yet...</p>
+                    {% endif %}
+                    
+                  {% else %}
+                    <p class="text-center text-muted m-0 py-4">This user hasn't entered any work experience yet...</p>                      
+                  {% endif %}
+                {% endif %}
+                {% if response.user.is_authenticated %}
+                  {% if response.user.username == user.username %}
+                    <hr>
+                    <div class="text-center">
+                      <a class="lead fs-4 btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addworkmodal">＋</a>
+                    </div>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="card mt-3 mb-3">
+              <div class="card-header">
+                <h5 class="m-2">Education</h5>
+              </div>
+              
+              <div class="card-body text-start">
+                  
+                  {% if education|length > 0 %}
+                    <ul class="list-group-flush p-0">
+                      
+                    {% for edu in education %}
+                      <li class="list-group-item">
+                        <!--<div class="float-end text-{{user.color}}">
+                          <a href="#" class="link-{{user.color}} text-decoration-none"><i class="fas fa-edit"></i></a>
+                          <a href="#" class="link-{{user.color}} text-decoration-none"><i class="fas fa-trash-alt"></i></a>
+                        </div>-->
+                      <span class="small text-{{user.color}} fw-bold">{{edu.start_year}}-{{edu.end_year}}</span>
+                      {% if edu.is_highschool %}
+                        <h5 class="card-title mb-1 mt-2">{{edu.school}}</h5>
+                        <p class="text-secondary mb-1">High School</p>
+                      {% else %}
+                        <h5 class="card-title mb-1 mt-2">{{edu.department}}</h5>
+                        <p class="text-secondary mb-1">{{edu.school}}</p>
+                      {% endif %}
+                      </li>
+                    {% endfor %}
+                    </ul>
+                  {% else %}
+                    {% if response.user.is_authenticated %}
+                        {% if response.user.username == user.username %}
+                        <p class="text-center text-muted m-0 py-4">You haven't entered any education info yet...</p>
+                        {% else %}
+                        <p class="text-center text-muted m-0 py-4">This user hasn't entered any education info yet...</p>
+                        {% endif %}
+                    {% else %}
+                      <p class="text-center text-muted m-0 py-4">This user hasn't entered any education info yet...</p>
+                    {% endif %}
+                {% endif %}
+                {% if response.user.is_authenticated %}
+                  {% if response.user.username == user.username %}
+                    <hr>
+                    <div class="text-center">
+                      <a class="lead fs-4 btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addeducationmodal">＋</a>
+                    </div>
+                  {% endif %}
+                {% endif %}
+
+              </div>
+            </div>
+          </div>
+          {% if response.user.is_authenticated and response.user.username == user.username %}
+              <div class="col-12 col-lg-6" {% if skills|length == 0 %}style="opacity: 0.5;"{% endif %}>
+                
+                <div class="card mt-3 mb-3">
+                  <div class="card-header">
+                    <h5 class="m-2">Yetenekler</h5>
+                  </div>
+                  <div class="card-body text-start">
+                    {% if skills|length == 0 %}<p class="text-center text-muted m-0 py-4">You haven't entered any skill yet...</p>{% endif %}
+                    <ul class="list-group-flush p-0">
+                        {% for s in skills %}
+                      <li class="list-group-item">
+                        <h5 class="card-title mb-1 mt-2">{{s.name}}</h5>
+                        <p class="text-secondary mb-1">{{s.get_rating_display}}</p>
+                        {% if s.rating == 5 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        {% elif s.rating == 4 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% elif s.rating == 3 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% elif s.rating == 2 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% else %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% endif %}
+                      </li>
+                      {% endfor %}
+                    </ul>
+                    <hr>
+                    <div class="text-center">
+                      <a class="lead fs-4 btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addskillmodal">＋</a>
+                    </div>
+                  </div>
+                </div>
+              </div>  
+          {% else %}
+          {% if skills|length > 0 %}
+          <div class="col-12 col-lg-6">
+                
+            <div class="card mt-3 mb-3">
+              <div class="card-header">
+                <h5 class="m-2">Yetenekler</h5>
+              </div>
+              <div class="card-body text-start">
+                <ul class="list-group-flush p-0">
+                    {% for s in skills %}
+                  <li class="list-group-item">
+                    <h5 class="card-title mb-1 mt-2">{{s.name}}</h5>
+                    <p class="text-secondary mb-1">{{s.get_rating_display}}</p>
+                    {% if s.rating == 5 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    {% elif s.rating == 4 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% elif s.rating == 3 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% elif s.rating == 2 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% else %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endif %}
+
+          <!-- Languages -->
+
+          {% if response.user.is_authenticated and response.user.username == user.username %}
+              <div class="col-12 col-lg-6" {% if language|length == 0 %}style="opacity: 0.5;"{% endif %}>
+                
+                <div class="card mt-3 mb-3">
+                  <div class="card-header">
+                    <h5 class="m-2">Diller</h5>
+                  </div>
+                  <div class="card-body text-start">
+                    {% if language|length == 0 %}<p class="text-center text-muted m-0 py-4">You haven't entered any language yet...</p>{% endif %}
+                    <ul class="list-group-flush p-0">
+                        {% for l in language %}
+                      <li class="list-group-item">
+                        <h5 class="card-title mb-1 mt-2">{{l.name}}</h5>
+                        <p class="text-secondary mb-1">{{l.get_rating_display}}</p>
+                        {% if l.rating == 5 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        {% elif l.rating == 4 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% elif l.rating == 3 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% elif l.rating == 2 %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% else %}
+                        <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        <span class="far fa-circle me-2 text-secondary"></span>
+                        {% endif %}
+                      </li>
+                      {% endfor %}
+                    </ul>
+                    <hr>
+                    <div class="text-center">
+                      <a class="lead fs-4 btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addlangmodal">＋</a>
+                    </div>
+                  </div>
+                </div>
+              </div>  
+          {% else %}
+          {% if language|length > 0 %}
+          <div class="col-12 col-lg-6">
+                
+            <div class="card mt-3 mb-3">
+              <div class="card-header">
+                <h5 class="m-2">Diller</h5>
+              </div>
+              <div class="card-body text-start">
+                <ul class="list-group-flush p-0">
+                    {% for l in language %}
+                  <li class="list-group-item">
+                    <h5 class="card-title mb-1 mt-2">{{l.name}}</h5>
+                    <p class="text-secondary mb-1">{{l.get_rating_display}}</p>
+                    {% if l.rating == 5 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    {% elif l.rating == 4 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% elif l.rating == 3 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% elif l.rating == 2 %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% else %}
+                    <span class="fas fa-circle text-{{user.color}} me-2"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    <span class="far fa-circle me-2 text-secondary"></span>
+                    {% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+                
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endif %}
+
+          {% if response.user.is_authenticated and response.user.username == user.username %}
+          <div class="col-12 col-lg-6" {% if hobby|length == 0 %}style="opacity: 0.5;"{% endif %}>
+            <div class="card mt-3 mb-3">
+              <div class="card-header">
+                <h5 class="m-2">İlgi alanları</h5>
+              </div>
+              <div class="card-body text-start">
+                {% if hobby|length == 0 %}<p class="text-center text-muted m-0 py-4">You haven't entered any hobby yet...</p>{% endif %}
+                <ul class="list-group-flush p-0">
+                  {% for h in hobby %}
+                  <li class="list-group-item">
+                    <h5 class="card-title mb-1 mt-2">{{h.name}}</h5>
+                    <p class="text-secondary mb-1">{{h.description}}</p>
+                  </li>
+                  {% endfor %}
+                </ul>
+                <hr>
+                <div class="text-center">
+                  <a class="lead fs-4 btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addhobbymodal">＋</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% else %}
+            {% if hobby|length > 0 %}
+            <div class="col-12 col-lg-6">
+              <div class="card mt-3 mb-3">
+                <div class="card-header">
+                  <h5 class="m-2">İlgi alanları</h5>
+                </div>
+                <div class="card-body text-start">
+                  <ul class="list-group-flush p-0">
+                    {% for h in hobby %}
+                    <li class="list-group-item">
+                      <h5 class="card-title mb-1 mt-2">{{h.name}}</h5>
+                      <p class="text-secondary mb-1">{{h.description}}</p>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% endif %}
+
+          {% if response.user.is_authenticated and response.user.username == user.username %}
+            <div class="col-12 col-lg-6" {% if certificate|length == 0 %}style="opacity: 0.5;"{% endif %}>
+              <div class="card mt-3 mb-3">
+                <div class="card-header">
+                  <h5 class="m-2">Sertifika Ve Ödüller</h5>
+                </div>
+                <div class="card-body text-start">
+                  {% if certificate|length == 0 %}<p class="text-center text-muted m-0 py-4">You haven't entered any certificate or award yet...</p>{% endif %}
+                  <ul class="list-group-flush p-0">
+                      {% for c in certificate %}
+                    <li class="list-group-item">
+                      <span class="small text-{{user.color}} fw-bold text-uppercase">{{c.type}}</span>
+                      <h5 class="card-title mb-1 mt-2">{{c.description}}</h5>
+                      <p class="text-secondary mb-1">{{c.year}}</p>
+                    </li>
+                      {% endfor %}
+                  </ul>
+                  <hr>
+                  <div class="text-center">
+                    <a class="lead fs-4 btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addcertmodal">＋</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            {% if certificate|length > 0 %}
+            <div class="col-12 col-lg-6">
+              <div class="card mt-3 mb-3">
+                <div class="card-header">
+                  <h5 class="m-2">Sertifika Ve Ödüller</h5>
+                </div>
+                <div class="card-body text-start">
+                  <ul class="list-group-flush p-0">
+                      {% for c in certificate %}
+                    <li class="list-group-item">
+                      <span class="small text-{{user.color}} fw-bold text-uppercase">{{c.type}}</span>
+                      <h5 class="card-title mb-1 mt-2">{{c.description}}</h5>
+                      <p class="text-secondary mb-1">{{c.year}}</p>
+                    </li>
+                      {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% endif %}
+          
+          
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="pills-gallery" role="tabpanel" aria-labelledby="pills-gallery-tab">
+      <div class="container">
+        <h4>Web Design</h4>
+        <div class="row my-3">
+          <div class="col-lg-3 pb-3 px-3">
+            <div class="card p-0">
+              <img src="" class="card-img-top" alt="...">
+              <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="btn btn-{{user.color}}">Go somewhere</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if response.user.is_authenticated %}
+    {% if response.user.username == user.username %}
+      <div class="modal fade" id="editmodal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Profile</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              
+              <form action="/edit/" method="POST" enctype="multipart/form-data" class="form-group">
+                {% if user.avatar %}
+                  <img class="" src="{{user.avatar.url}}" style="height:100px; width: 100px; object-fit: cover; object-position: center; margin-bottom: 15px;"/>
+                {% else %}
+                  <img class="" src="{% static 'img/avatar_default.jpg' %}" style="height:100px; width: 100px; margin-bottom: 15px;"/>
+                {% endif %}
+                {% csrf_token %}
+                {{ edit_profile_form|crispy }}
+                <div id="div_id_color" class="form-group">
+                  <div>
+                    <label for="id_color" class="d-block">Profile Theme</label>
+                    <input type="radio" class="btn-check" name="form-color" id="primary-outlined" autocomplete="off" value="primary" {% if user.color == "primary" %}checked{% endif %}>
+                    <label class="btn btn-outline-primary p-3" for="primary-outlined"></label>
+                    <input type="radio" class="btn-check" name="form-color" id="danger-outlined" autocomplete="off" value="danger" {% if user.color == "danger" %}checked{% endif %}>
+                    <label class="btn btn-outline-danger p-3" for="danger-outlined"></label>
+                    <input type="radio" class="btn-check" name="form-color" id="success-outlined" autocomplete="off" value="success" {% if user.color == "success" %}checked{% endif %}>
+                    <label class="btn btn-outline-success p-3" for="success-outlined"></label>
+                    <input type="radio" class="btn-check" name="form-color" id="warning-outlined" autocomplete="off" value="warning" {% if user.color == "warning" %}checked{% endif %}>
+                    <label class="btn btn-outline-warning p-3" for="warning-outlined"></label>
+                    <input type="radio" class="btn-check" name="form-color" id="info-outlined" autocomplete="off" value="info" {% if user.color == "info" %}checked{% endif %}>
+                    <label class="btn btn-outline-info p-3" for="info-outlined"></label>
+                    <input type="radio" class="btn-check" name="form-color" id="secondary-outlined" autocomplete="off" value="secondary" {% if user.color == "secondary" %}checked{% endif %}>
+                    <label class="btn btn-outline-secondary p-3" for="secondary-outlined"></label>
+                  </div>
+                </div>
+
+                <button type="submit" name="submit-edit" class="btn btn-{{user.color}} d-block w-100 mt-4">Save</button>
+                <button type="submit" name="submit-clear" class="btn btn-outline-danger d-block w-100 mt-2">Clear Picture</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if response.user.is_authenticated %}
+    {% if response.user.username == user.username %}
+      <div class="modal fade" id="addeducationmodal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Education</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              
+              <form action="/add/" method="POST" class="form-group">
+                {% csrf_token %}
+                {{ educationform|crispy }}
+                <button type="submit" name="submit-addeducation" class="btn btn-{{user.color}} d-block w-100 mt-4">Save</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if response.user.is_authenticated %}
+    {% if response.user.username == user.username %}
+      <div class="modal fade" id="addworkmodal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Work Experience</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              
+              <form action="/add/" method="POST" class="form-group">
+                {% csrf_token %}
+                {{ workform|crispy }}
+                <button type="submit" name="submit-addwork" class="btn btn-{{user.color}} d-block w-100 mt-4">Save</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if response.user.is_authenticated %}
+  {% if response.user.username == user.username %}
+    <div class="modal fade" id="addskillmodal" tabindex="-1">
+      <div class="modal-dialog modal-fullscreen-sm-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Skill</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+            <form action="/add/" method="POST" class="form-group">
+              {% csrf_token %}
+              <label for="exampleFormControlInput1" class="form-label">Name</label>
+              <input type="text" class="form-control" name="name" id="exampleFormControlInput1">
+              <label class="d-block">Rating</label>
+              <div class="form-check-inline">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio1" value="1">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio2" value="2">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio3" value="3">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio4" value="4">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio5" value="5">
+              </div>
+              <button type="submit" name="submit-addskill" class="btn btn-{{user.color}} d-block w-100 mt-4">Save</button>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endif %}
+
+{% if response.user.is_authenticated %}
+  {% if response.user.username == user.username %}
+    <div class="modal fade" id="addlangmodal" tabindex="-1">
+      <div class="modal-dialog modal-fullscreen-sm-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Language</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+            <form action="/add/" method="POST" class="form-group">
+              {% csrf_token %}
+              <label for="exampleFormControlInput1" class="form-label">Language</label>
+              <input type="text" class="form-control" name="name" id="exampleFormControlInput1">
+              <label class="d-block">Rating</label>
+              <div class="form-check-inline">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio1" value="1">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio2" value="2">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio3" value="3">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio4" value="4">
+                <input class="form-check-input me-2" type="radio" name="rating" id="inlineRadio5" value="5">
+              </div>
+              <button type="submit" name="submit-addlang" class="btn btn-{{user.color}} d-block w-100 mt-4">Save</button>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endif %}
+
+{% if response.user.is_authenticated %}
+  {% if response.user.username == user.username %}
+    <div class="modal fade" id="addhobbymodal" tabindex="-1">
+      <div class="modal-dialog modal-fullscreen-sm-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Hobby</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+            <form action="/add/" method="POST" class="form-group">
+              {% csrf_token %}
+              {{ hobbyform|crispy }}
+              <button type="submit" name="submit-addhobby" class="btn btn-{{user.color}} d-block w-100 mt-4">Save</button>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endif %}
+
+{% if response.user.is_authenticated %}
+  {% if response.user.username == user.username %}
+    <div class="modal fade" id="addcertmodal" tabindex="-1">
+      <div class="modal-dialog modal-fullscreen-sm-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Certificate/Award</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+            <form action="/add/" method="POST" class="form-group">
+              {% csrf_token %}
+              {{ certificateform|crispy }}
+              <button type="submit" name="submit-addcert" class="btn btn-{{user.color}} d-block w-100 mt-4">Save</button>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endif %}
+
+
+
+{% endblock %}
+    
+
+
+    <!-- Animate on scroll JS -->
+    <script src="{% static 'user/js/aos.js' %}"></script>
+    <script>
+      AOS.init();
+    </script>
+
+    <!--  isScrolled Script -->
+
+    <script>
+      $(window).scroll(function () {
+      if ($(window).scrollTop() >= 50) {
+      $('.navbar').addClass("is-scrolled");
+      } else {
+      $('.navbar').removeClass("is-scrolled");
+      }
+      });
+    </script>
+
+    <!--  Bootstrap Bundle with Popper -->
+    <script src="{% static 'user/js/bootstrap.bundle.min.js' %}"></script>
+
+  </body>
+</html>
